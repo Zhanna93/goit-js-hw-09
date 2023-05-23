@@ -3,6 +3,13 @@ import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
 
 const buttonStart = document.querySelector('button[data-start]');
+const inputData = document.querySelector('#datetime-picker');
+const daysSpan = document.querySelector('[data-days]');
+const hoursSpan = document.querySelector('[data-hours]');
+const minutesSpan = document.querySelector('[data-minutes]');
+const secondsSpan = document.querySelector('[data-seconds]');
+
+buttonStart.setAttribute('disabled', '');
 
 const options = {
   enableTime: true,
@@ -10,38 +17,55 @@ const options = {
   defaultDate: new Date(),
   minuteIncrement: 1,
  onClose(selectedDates) {
-  buttonStart.addEventListener('click', timer.updateMarkup());
+ if (Date.parse(inputData.value) > Date.parse(new Date())) {
+  buttonStart.removeAttribute('disabled')
+
+  return
+ }
+ window.alert("Please choose a date in the future")
   console.log(selectedDates[0]);
   },
 };
 
 const datePicker = flatpickr('#datetime-picker', options);
 
-const inputData = document.querySelector('#datetime-picker');
 
-buttonStart.setAttribute('disabled', '')
 
-inputData.value = ''
-
-class CountDownTimer {
- constructor({ selector, inputData }) {
-  this.inputData = inputData.value;
-  this.daysSpan = document.querySelector('[data-days]')
-  this.hoursSpan = document.querySelector('[data-hours]')
-  this.minutesSpan = document.querySelector('[data-minutes]')
-  this.secondsSpan = document.querySelector('[data-seconds]')
+class Timer {
+ constructor({onTick}) {
+  this.intervalId = null;
+  this.isActive = false;
+  this.onTick = onTick;
  }
 
- updateMarkup() {
-  setInterval(() => {
-   const currentTime = Date.now();
-   const delta = this.targetDate - currentTime;
-   const { days, hours, minutes, seconds } = this.convertMs(delta)
-   this.daysSpan.textContent = days;
-   this.hoursSpan.textContent = hours;
-   this.minutesSpan.textContent = minutes;
-   this.secondsSpan.textContent = seconds;
-  }, 1000)
+  onButtonClick() {
+   if (this.isActive) {
+    return
+   }
+  const futureTime = inputData.value;
+  const secondFutureTime = Date.parse(futureTime);
+  this.isActive = true;
+
+ // console.log(secondFutureTime)
+
+ this.intervalId = setInterval(() => {
+  const currentTime = Date.now();
+
+  const deltaTime = secondFutureTime - currentTime;
+  const time = this.convertMs(deltaTime);
+  this.onTick(time)
+
+  // console.log(currentTime)
+  // console.log(deltaTime)
+  // console.log(time)
+ }, 1000);
+ }
+
+ stop() {
+  if (this.time <= 0) {
+   clearInterval(this.intervalId);
+   this.isActive = false;
+  }
  }
 
 convertMs(ms) {
@@ -51,26 +75,32 @@ convertMs(ms) {
   const hour = minute * 60;
   const day = hour * 24;
 
-
-  const days = Math.floor(ms / day);
-  const hours = Math.floor((ms % day) / hour);
-  const minutes = Math.floor(((ms % day) % hour) / minute);
-  const seconds = Math.floor((((ms % day) % hour) % minute) / second);
+  const days = this.addLeadingZero(Math.floor(ms / day));
+  const hours = this.addLeadingZero(Math.floor((ms % day) / hour));
+  const minutes = this.addLeadingZero(Math.floor(((ms % day) % hour) / minute));
+  const seconds = this.addLeadingZero(Math.floor((((ms % day) % hour) % minute) / second));
 
   return { days, hours, minutes, seconds };
 }
+
+addLeadingZero(value) {
+ return String(value).padStart(2, '0');
+};
 }
 
-const timer = new CountDownTimer({
- selector: '.timer',
- inputData: inputData.value,
-})
+const timer = new Timer({
+ onTick: updateMarkup,
+});
 
-inputData.oninput = () => {
- if (Date.parse(inputData.value) > Date.parse(new Date())) {
-  buttonStart.removeAttribute('disabled')
+buttonStart.addEventListener('click', () => {
+  timer.onButtonClick()
+});
+ 
+timer.stop();
 
-  return
- }
- window.alert("Please choose a date in the future")
+function updateMarkup({ days, hours, minutes, seconds }) {
+daysSpan.textContent = `${days}`;
+hoursSpan.textContent = `${hours}`;
+minutesSpan.textContent = `${minutes}`;
+secondsSpan.textContent = `${seconds}`;
 }

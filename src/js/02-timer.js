@@ -1,4 +1,5 @@
 import flatpickr from "flatpickr";
+import Notiflix from 'notiflix';
 
 import "flatpickr/dist/flatpickr.min.css";
 
@@ -19,17 +20,15 @@ const options = {
  onClose(selectedDates) {
  if (Date.parse(inputData.value) > Date.parse(new Date())) {
   buttonStart.removeAttribute('disabled')
-
+  // Notiflix.Notify.success('Success');
   return
  }
- window.alert("Please choose a date in the future")
+ Notiflix.Notify.failure('Please choose a date in the future')
   console.log(selectedDates[0]);
   },
 };
 
 const datePicker = flatpickr('#datetime-picker', options);
-
-
 
 class Timer {
  constructor({onTick}) {
@@ -38,10 +37,10 @@ class Timer {
   this.onTick = onTick;
  }
 
-  onButtonClick() {
-   if (this.isActive) {
-    return
-   }
+onButtonClick() {
+ if (this.isActive) {
+  return
+ }
   const futureTime = inputData.value;
   const secondFutureTime = Date.parse(futureTime);
   this.isActive = true;
@@ -57,16 +56,17 @@ class Timer {
 
   // console.log(currentTime)
   // console.log(deltaTime)
-  // console.log(time)
+  console.log(time)
  }, 1000);
- }
+}
 
- stop() {
-  if (this.time <= 0) {
-   clearInterval(this.intervalId);
-   this.isActive = false;
-  }
- }
+stop() {
+if (this.deltaTime <= 0) {
+ clearInterval(this.intervalId);
+ Notiflix.Notify.success('Countdown finished!');
+ input.disabled = false;
+}
+}
 
 convertMs(ms) {
 
@@ -95,12 +95,16 @@ const timer = new Timer({
 buttonStart.addEventListener('click', () => {
   timer.onButtonClick()
 });
- 
-timer.stop();
+
 
 function updateMarkup({ days, hours, minutes, seconds }) {
-daysSpan.textContent = `${days}`;
-hoursSpan.textContent = `${hours}`;
-minutesSpan.textContent = `${minutes}`;
-secondsSpan.textContent = `${seconds}`;
+ daysSpan.textContent = `${days}`;
+ hoursSpan.textContent = `${hours}`;
+ minutesSpan.textContent = `${minutes}`;
+ secondsSpan.textContent = `${seconds}`;
+ 
 }
+
+ 
+// timer.stop();
+

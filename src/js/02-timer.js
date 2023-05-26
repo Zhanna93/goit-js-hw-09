@@ -53,7 +53,7 @@ onButtonClick() {
   // console.log(currentTime)
   // console.log(secondFutureTime)
   const deltaTime = secondFutureTime - currentTime;
-  if (deltaTime <= 0) {
+  if (deltaTime <= 1000) {
    this.stop();
 
    // console.log(deltaTime)

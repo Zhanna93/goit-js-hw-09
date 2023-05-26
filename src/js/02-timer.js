@@ -50,26 +50,29 @@ onButtonClick() {
  this.intervalId = setInterval(() => {
   const currentTime = Date.now();
 
-  const deltaTime = secondFutureTime - currentTime;
-  const time = this.convertMs(deltaTime);
-  this.onTick(time)
-
   // console.log(currentTime)
-  // console.log(deltaTime)
+  // console.log(secondFutureTime)
+  const deltaTime = secondFutureTime - currentTime;
+  if (deltaTime <= 0) {
+   this.stop();
+
+   // console.log(deltaTime)
+  };
+
+  const time = this.convertMs(deltaTime);
+  this.onTick(time);
+
   console.log(time)
  }, 1000);
 }
 
-stop() {
-if (this.currentTime === this.secondFutureTime) {
+ stop() {
  clearInterval(this.intervalId);
  this.isActive = false;
  const time = this.convertMs(0);
  this.onTick(time);
  Notiflix.Notify.success('Countdown finished!');
-
-}
- }
+ };
 
 convertMs(ms) {
 
@@ -99,7 +102,8 @@ buttonStart.addEventListener('click', () => {
   timer.onButtonClick()
 });
 
-timer.stop();
+// const bindFn = stop.bind(timer);
+// timer.stop(bindFn);
 
 function updateMarkup({ days, hours, minutes, seconds }) {
  daysSpan.textContent = `${days}`;
